@@ -54,7 +54,7 @@ jobs:
       - name: Maven CI Build test
         run: |
           mvn --version
-          java --version
+          java -version
           mvn package
           mvn -B package --file pom.xml -DskipITs
 
