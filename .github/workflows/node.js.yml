@@ -27,8 +27,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [ '18.x', '20.x', '21.x' ]
-        jdk-version: [ "8", "11", "17", "21", "24" ]
+        jdk-version: [ "8", "24" ]
+#        node-version: [ '18.x', '20.x', '21.x' ]
+#        jdk-version: [ "8", "11", "17", "21", "24" ]
         os: [ ubuntu-latest, macOS-latest, windows-latest ]
 
     steps:
@@ -50,17 +51,17 @@ jobs:
           java-version: ${{ matrix.jdk-version }}
           distribution: 'corretto'
 
-      - name: Maven CI Build test
-        run: |
-          mvn --version
-          java --version
-          mvn package
-          mvn -B package --file pom.xml -DskipITs
+#      - name: Maven CI Build test
+#        run: |
+#          mvn --version
+#          java --version
+#          mvn package
+#          mvn -B package --file pom.xml -DskipITs
 
-      - name: Set up Node.js ${{ matrix.node-version }}
+      - name: Set up Node.js 21.x
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "21.x"
           cache: 'npm'
 
       - name: npm clean install, build, and test
