@@ -5,7 +5,7 @@
 name: Sample Run and Dependabot Auto-merge
 on:
   push:
-    branches: [ master ]
+    branches: [ master, maven-test ]
   pull_request_target:
     branches: [ master ]
   workflow_dispatch:
