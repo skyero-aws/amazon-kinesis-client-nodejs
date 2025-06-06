@@ -17,6 +17,7 @@ var convert = require('xml-js');
 var url = require('url');
 var util = require('util');
 const { program } = require('commander');
+const { execSync } = require('child_process');
 
 const mavenFile = fs.readFileSync(path.join(__dirname, '..', 'pom.xml'), 'utf8');
 const mavenJson = JSON.parse(convert.xml2json(mavenFile, { compact: true }));
@@ -34,12 +35,88 @@ var MAX_HTTP_REDIRECT_FOLLOW = 3;
 
 function bootstrap() {
   var args = parseArguments();
-  downloadMavenPackages(MAVEN_PACKAGE_LIST, args.jarPath, function (err) {
+
+  // Step 1: Download initial Maven packages from pom.xml
+  downloadMavenPackages(MAVEN_PACKAGE_LIST, args.jarPath, function(err) {
     if (err) {
-      errorExit(util.format('Unable to download MultiLangDaemon jar files from maven: %s', err));
+      errorExit(util.format('Unable to download initial Maven packages: %s', err));
+      return;
     }
-    startKinesisClientLibraryApplication(args);
+
+    // Step 2: Unzip the jar file
+    const jarPath = path.join(args.jarPath, 'amazon-kinesis-client-multilang-3.0.3-SNAPSHOT.jar');
+    const extractPath = path.join(args.jarPath, '');
+
+    if (!unzipJar(jarPath, extractPath)) {
+      errorExit('Failed to extract jar file');
+      return;
+    }
+
+    try {
+      // Step 3: Read additional dependencies from extracted jar
+      console.log('Attempting to read dependencies from jar...');
+      const additionalDeps = readDependenciesFromJar(extractPath);
+      if (!additionalDeps) {
+        errorExit('Failed to read additional dependencies');
+        return;
+      }
+      console.log('Successfully read additional dependencies');
+
+      // Step 4: Download additional dependencies
+      downloadMavenPackages(additionalDeps, args.jarPath, function(err) {
+        if (err) {
+          errorExit(util.format('Unable to download additional dependencies: %s', err));
+          return;
+        }
+
+        // Step 5: Continue with the original application startup
+        startKinesisClientLibraryApplication(args);
+      });
+    } catch (error) {
+      errorExit(`Error processing dependencies: ${error.message}`);
+    }
   });
+}
+
+function readDependenciesFromJar(extractedJarPath) {
+  try {
+    console.log('Looking for dependencies in:', extractedJarPath);
+    const jsonPath = path.join(extractedJarPath, 'pom-sync/multilang_dependencies.json');
+
+    if (!fs.existsSync(jsonPath)) {
+      throw new Error(`Dependencies file not found at ${jsonPath}`);
+    }
+
+    const dependenciesJson = fs.readFileSync(jsonPath, 'utf8');
+    const parsed = JSON.parse(dependenciesJson);
+
+    const dependencies = parsed.dependencies;
+
+    if (!dependencies || !Array.isArray(dependencies)) {
+      throw new Error('Invalid dependencies format');
+    }
+
+    console.log('Successfully parsed dependencies JSON');
+    return dependencies;
+  } catch (error) {
+    console.error(`Failed to read dependencies from jar: ${error.message}`);
+    return null;
+  }
+}
+
+function unzipJar(jarPath, targetDir) {
+  try {
+    execSync(`mkdir -p ${targetDir}`);
+    process.chdir(targetDir);
+
+    execSync(`jar xf "${jarPath}"`);
+    console.log(`Successfully unzipped jar file: ${jarPath}`);
+
+    return true;
+  } catch (error) {
+    console.error(`Failed to unzip jar file: ${error.message}`)
+    return false;
+  }
 }
 
 function createJavaHomeExecutablePath() {
