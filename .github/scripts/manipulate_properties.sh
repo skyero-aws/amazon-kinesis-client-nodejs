@@ -20,4 +20,4 @@ else
   exit 1
 fi
 
-cat samples/sample.properties
+cat samples/basic_sample/consumer/sample.properties
