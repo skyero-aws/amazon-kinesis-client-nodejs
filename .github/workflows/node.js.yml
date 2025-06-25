@@ -84,7 +84,7 @@ jobs:
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ARN_GHA }}
-          role-session-name: GHA-${{ github.run_id }}-${{ matrix.python-version }}-${{ matrix.jdk-version }}-${{ matrix.os }}
+          role-session-name: GHA-${{ github.run_id }}-${{ matrix.node-version }}-${{ matrix.jdk-version }}-${{ matrix.os }}
 
       - name: Set up JDK ${{ matrix.jdk-version }}
         uses: actions/setup-java@v4
