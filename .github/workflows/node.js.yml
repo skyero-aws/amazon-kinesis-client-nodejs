@@ -169,6 +169,16 @@ jobs:
         env:
           APP_NAME: ${{ env.APP_NAME }}
 
+      # Clean up all existing Streams and DDB tables
+      - name: Clean up Kinesis Stream and DynamoDB table
+        if: always()
+        run: |
+          chmod +x .github/scripts/clean_up_stream_table.sh
+          .github/scripts/clean_up_stream_table.sh
+        env:
+          STREAM_NAME: ${{ env.STREAM_NAME }}
+          APP_NAME: ${{ env.APP_NAME }}
+
   auto-merge-dependabot:
     needs: [ sample-run ]
     runs-on: ubuntu-latest
