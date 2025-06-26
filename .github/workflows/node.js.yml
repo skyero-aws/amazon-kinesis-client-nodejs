@@ -69,7 +69,7 @@ jobs:
       matrix:
         node-version: [ '18.x' ]
         jdk-version: [ "8" ]
-        os: [ ubuntu-latest, macOS-latest ]
+        os: [ ubuntu-latest, macOS-latest, windows-latest ]
 
     steps:
       # For pull_request_target, checkout PR head instead of merge commit
