@@ -11,7 +11,7 @@ on:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
 concurrency:
-  group: privileged-run.yml
+  group: node.js.yml
   cancel-in-progress: false
 
 jobs:
