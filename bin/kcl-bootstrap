@@ -91,11 +91,9 @@ function unzipJar(jarPath, extractPath, callback) {
     callback('Multilang jar file not found');
     return;
   }
-  var unzipCmd = process.platform === 'win32' ? 'tar' : 'unzip';
-  var args = process.platform === 'win32' ?
-      ['-xf', multilangJarFile, '-C', extractPath]:
-      ['-q', multilangJarFile, '-d', extractPath];
-  var child = spawn(unzipCmd, args);
+  var jarCmd = process.env.JAVA_HOME ?
+      path.join(process.env.JAVA_HOME, 'bin', 'jar') : 'jar';
+  var child = spawn(jarCmd, ['-xf', multilangJarFile], { cwd: extractPath });
   child.on('close', function(code) {
     if (code !== 0) {
       callback('Failed to extract jar: exit code ' + code);
