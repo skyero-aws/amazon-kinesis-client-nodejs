@@ -86,6 +86,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Temporary JAR moving step
+        run: |
+          mv amazon-kinesis-client-multilang-3.0.3-SNAPSHOT.jar lib/jars/
+
       - name: npm clean install, build, and test
         run: |
           npm ci
