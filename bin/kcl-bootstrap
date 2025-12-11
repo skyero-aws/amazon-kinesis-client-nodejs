@@ -95,12 +95,16 @@ function unzipJar(jarPath, extractPath, callback) {
   var args = process.platform === 'win32' ?
       ['-xf', multilangJarFile, '-C', extractPath]:
       ['-q', multilangJarFile, '-d', extractPath];
-  spawn(unzipCmd, args, function(error, stdout, stderr) {
-    if (error) {
-      callback('Failed to extract jar: ' + error.message);
+  var child = spawn(unzipCmd, args);
+  child.on('close', function(code) {
+    if (code !== 0) {
+      callback('Failed to extract jar: exit code ' + code);
     } else {
       callback(null, extractPath);
     }
+  });
+  child.on('error', function(error) {
+    callback('Failed to extract jar: ' + error.message);
   });
 }
 
