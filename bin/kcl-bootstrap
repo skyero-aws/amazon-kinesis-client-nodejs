@@ -43,37 +43,35 @@ function bootstrap() {
     }
 
     // Unzip multilang jar file
-    const multilangJarPath = path.join(args.jarPath, 'test');
-    const extractJarPath = path.join(args.jarPath, '');
-
-    if (!unzipJar(multilangJarPath, extractJarPath)) {
-      errorExit('Failed to extract jar file');
-      return;
-    }
-
-    try {
-      // Read KCL dependencies from JSON file
-      console.log('Attempting to read dependencies from json...');
-      const kclDeps = readDependenciesFromJar(extractJarPath);
-      if (!kclDeps) {
-        errorExit('Failed to read KCL dependencies');
+    unzipJar(args.jarPath, args.jarPath, function(err, extractPath) {
+      if (err) {
+        errorExit('Failed to extract jar file: ' + err);
         return;
       }
-      console.log('Successfully read KCL dependencies');
 
-      // Download KCL dependencies
-      downloadMavenPackages(kclDeps, args.jarPath, function(err) {
-        if (err) {
-          errorExit(util.format('Unable to download KCL dependencies: %s', err));
+      try {
+        // Read KCL dependencies from JSON file
+        console.log('Attempting to read dependencies from json...');
+        const kclDeps = readDependenciesFromJar(extractPath);
+        if (!kclDeps) {
+          errorExit('Failed to read KCL dependencies');
           return;
         }
+        console.log('Successfully read KCL dependencies');
 
-        // Step 5: Continue with the original application startup
-        startKinesisClientLibraryApplication(args);
-      });
-    } catch (error) {
-      errorExit(`Error processing KCL dependencies: ${error.message}`);
-    }
+        // Download KCL dependencies
+        downloadMavenPackages(kclDeps, args.jarPath, function(err) {
+          if (err) {
+            errorExit(util.format('Unable to download KCL dependencies: %s', err));
+            return;
+          }
+
+          startKinesisClientLibraryApplication(args);
+        });
+      } catch (error) {
+        errorExit(`Error processing KCL dependencies: ${error.message}`);
+      }
+    });
   });
 }
 
