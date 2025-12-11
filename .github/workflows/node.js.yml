@@ -88,6 +88,7 @@ jobs:
 
       - name: Temporary JAR moving step
         run: |
+          mkdir -p lib/jars/
           mv amazon-kinesis-client-multilang-3.0.3-SNAPSHOT.jar lib/jars/
 
       - name: npm clean install, build, and test
