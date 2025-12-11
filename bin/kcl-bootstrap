@@ -94,9 +94,9 @@ function unzipJar(jarPath, extractPath, callback) {
     return;
   }
   var unzipCmd = process.platform === 'win32' ? 'tar' : 'unzip';
-  var args = process.platform === 'win32'
-      ? ['-xf', multilangJarFile, '-C', extractPath]
-      : ['-q', multilangJarFile, '-d', extractPath];
+  var args = process.platform === 'win32' ?
+      ['-xf', multilangJarFile, '-C', extractPath]:
+      ['-q', multilangJarFile, '-d', extractPath];
   spawn(unzipCmd, args, function(error, stdout, stderr) {
     if (error) {
       callback('Failed to extract jar: ' + error.message);
